@@ -1,6 +1,6 @@
-# ─────────────────────────────────────────────────────────────
-# .github/workflows/ci.yml — CI Skeleton 
-# ─────────────────────────────────────────────────────────────
+# CI for: Node.js + Express backend, static HTML/CSS/JS frontend,
+# Jest + Supertest, Docker image, optional Gemini API in tests.
+# Ensure package.json defines: "lint", "test", and expose the app on port 3000 in Docker.
 
 name: CI Pipeline
 
@@ -14,9 +14,13 @@ on:
       - main
       - develop
 
+env:
+  NODE_ENV: test
+  CI: true
+
 jobs:
-  build:
-    name: Build & Smoke Test
+  ci:
+    name: Lint, test, Docker, smoke
     runs-on: ubuntu-latest
 
     steps:
@@ -32,8 +36,27 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Smoke test (placeholder)
-        run: echo "CI skeleton is working — add real tests in Week 12"
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run unit and API tests (Jest + Supertest)
+        run: npm test
+        env:
+          # Repository secret for integration tests that call Gemini; mock when unset.
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
       - name: Build Docker image
-        run: docker build -t study-ai:ci-check .
+        run: docker build -t ai-study-helper:ci .
+
+      - name: Smoke test — container responds
+        run: |
+          docker run -d --name ci-smoke -p 3000:3000 ai-study-helper:ci
+          trap 'docker rm -f ci-smoke 2>/dev/null || true' EXIT
+          for _ in $(seq 1 60); do
+            if curl -sf http://127.0.0.1:3000/health >/dev/null; then exit 0; fi
+            if curl -sf http://127.0.0.1:3000/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          echo "Server did not respond on :3000 (/health or /)"
+          docker logs ci-smoke
+          exit 1
