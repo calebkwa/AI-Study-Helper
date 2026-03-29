@@ -1,6 +1,7 @@
 # CI for: Node.js + Express backend, static HTML/CSS/JS frontend,
 # Jest + Supertest, Docker image, optional Gemini API in tests.
 # Ensure package.json defines: "lint", "test", and expose the app on port 3000 in Docker.
+# Runs only for main: pushes to main and PRs targeting main (e.g. merges from feature/develop).
 
 name: CI Pipeline
 
@@ -8,12 +9,9 @@ on:
   push:
     branches:
       - main
-      - develop
-      - 'feature/**'
   pull_request:
     branches:
       - main
-      - develop
 
 env:
   NODE_ENV: test
