@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const { generateSummary } = require('./geminiService');
 
 function createApp() {
   const app = express();
@@ -18,11 +19,11 @@ function createApp() {
     res.send('AI Study Helper');
   });
 
-  app.post('/api/generate', (req, res) => {
+  app.post('/api/generate', async (req, res) => {
     const { notes } = req.body;
 
     // FAKE RESPONSE FOR TESTING
-    const summary = "This is a generated summary of your notes.";
+    const summary = await generateSummary(notes);
 
     res.json({
       original_notes: notes,
