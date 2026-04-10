@@ -2,6 +2,8 @@ const express = require('express');
 const path = require('path');
 const quizRoutes = require("./routes/quiz");
 const generateNotes = require("./geminiService.js");
+const { saveSession } = require("./services/sessionStore");
+
 
 function createApp() {
   const app = express();
@@ -24,14 +26,30 @@ function createApp() {
 
   app.post("/api/generate", async (req, res) => {
     try {
-      const { notes } = req.body;
+      const { notes, mode = "summary" } = req.body;
 
-      const output = await generateNotes(notes);
+      let prompt;
+
+      if (mode === "summary") {
+        prompt = `Summarize into short bullet points:\n\n${notes}`;
+      } else if (mode === "flashcards") {
+        prompt = `Convert into flashcards (Q&A format):\n\n${notes}`;
+      } else {
+        return res.status(400).json({ error: "Invalid mode" });
+      }
+
+      const output = await generateNotes(prompt);
+
+      saveSession({
+        notes,
+        result: output,
+        date: new Date()
+      });
 
       res.json({ result: output });
+
     } catch (err) {
-      console.error("FULL ERROR:", err);
-      res.status(500).json({ error: err.message || "Something went wrong" });
+      res.status(500).json({ error: err.message });
     }
   });
 
