@@ -1,11 +1,14 @@
 const express = require('express');
 const path = require('path');
 const generateNotes = require("./geminiService.js");
+const quizRouter = require('./routes/quiz');
 
 function createApp() {
   const app = express();
   app.use(express.json());
   app.use(express.static(path.join(__dirname, '../public')));
+
+  app.use('/api/quiz', quizRouter);
 
   app.get('/health', (req, res) => {
     res.status(200).json({ status: 'ok' });
