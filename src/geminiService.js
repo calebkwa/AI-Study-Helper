@@ -2,8 +2,8 @@ const axios = require("axios");
 
 const API_KEY = process.env.GEMINI_API_KEY;
 
-// Models to try in order
-const MODELS = ["gemini-2.5-flash", "gemini-1.5-flash"];
+// Models to try
+const MODELS = ["gemini-2.5-flash"];
 
 async function callGemini(model, notes) {
   const response = await axios.post(
