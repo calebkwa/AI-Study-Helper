@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const quizRoutes = require("./routes/quiz");
 const generateNotes = require("./geminiService.js");
 
 function createApp() {
@@ -20,7 +21,7 @@ function createApp() {
     res.send('AI Study Helper');
   });
 
-  // ✅ YOUR AI ROUTE
+
   app.post("/api/generate", async (req, res) => {
     try {
       const { notes } = req.body;
@@ -33,6 +34,8 @@ function createApp() {
       res.status(500).json({ error: err.message || "Something went wrong" });
     }
   });
+
+  app.use("/api/quiz", quizRoutes);
 
   return app;
 }
