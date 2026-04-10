@@ -1,16 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>AI Study Helper</title>
-    <link rel="stylesheet" href="/styles.css" />
-  </head>
-  <body>
-    <main>
-      <h1>AI Study Helper</h1>
-      <p>Static frontend skeleton — add your UI here.</p>
-    </main>
-    <script src="/app.js"></script>
-  </body>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Study Helper</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+
+  <div class="container">
+    <h1>📚 AI Study Helper</h1>
+    <p class="subtitle">Turn your notes into clear study summaries</p>
+
+    <textarea id="notes" placeholder="Paste your notes here..."></textarea>
+
+    <button onclick="generateNotes()">Generate Notes</button>
+
+    <div id="loading" class="hidden">Generating...</div>
+
+    <div class="output-box">
+      <h2>Result</h2>
+      <pre id="output"></pre>
+    </div>
+  </div>
+
+  <script>
+    async function generateNotes() {
+      const notes = document.getElementById("notes").value;
+      const output = document.getElementById("output");
+      const loading = document.getElementById("loading");
+
+      output.textContent = "";
+      loading.classList.remove("hidden");
+
+      try {
+        const res = await fetch("/api/generate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ notes })
+        });
+
+        const data = await res.json();
+        output.textContent = data.result;
+
+      } catch (err) {
+        output.textContent = "Error generating notes.";
+      }
+
+      loading.classList.add("hidden");
+    }
+  </script>
+
+</body>
 </html>
