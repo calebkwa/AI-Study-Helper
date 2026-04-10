@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('path');
-const { generateSummary } = require('./geminiService');
+const generateNotes = require("./geminiService.js");
 
 function createApp() {
   const app = express();
@@ -19,20 +19,22 @@ function createApp() {
     res.send('AI Study Helper');
   });
 
-  app.post('/api/generate', async (req, res) => {
-    const { notes } = req.body;
+  app.post("/api/generate", async (req, res) => {
+    try {
+      const { notes } = req.body;
 
-    // FAKE RESPONSE FOR TESTING
-    const summary = await generateSummary(notes);
+      const output = await generateNotes(notes);
 
-    res.json({
-      original_notes: notes,
-      generated_summary: summary,
-      timestamp: new Date()
-    });
+      res.json({ result: output });
+    } catch (err) {
+      console.error("FULL ERROR:", err);
+      res.status(500).json({ error: err.message || "Something went wrong" });
+    }
   });
 
-  return app;
-}
+  
+
+    return app;
+  }
 
 module.exports = { createApp };
