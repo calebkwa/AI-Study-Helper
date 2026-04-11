@@ -61,7 +61,11 @@ function parseFlashcardResponse(text) {
  * Build the user prompt for flashcard generation (used by API layer).
  */
 function buildFlashcardPrompt(notes, language = 'English') {
-  return `Convert into flashcards (Q&A format) in ${language}:\n\n${notes}`;
+  return `Convert the notes below into flashcards for study. Write every question and every answer in ${language} only.
+
+Formatting (required for parsing): start each question line with "Q: " and each answer line with "A: " (Latin letters). Put one pair per block, separated by a blank line.
+
+Notes:\n${notes}`;
 }
 
 module.exports = {

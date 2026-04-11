@@ -65,11 +65,11 @@ function buildFallbackQuiz(topic, questionCount) {
   return { questions };
 }
 
-async function generateWithGemini({ topic, material, questionCount, apiKey }) {
+async function generateWithGemini({ topic, material, questionCount, language, apiKey }) {
   const modelName = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ model: modelName });
-  const prompt = buildQuizGenerationPrompt({ topic, material, questionCount });
+  const prompt = buildQuizGenerationPrompt({ topic, material, questionCount, language });
   const result = await model.generateContent(prompt);
   const text = result.response.text();
   const data = extractJsonObject(text);
@@ -79,7 +79,7 @@ async function generateWithGemini({ topic, material, questionCount, apiKey }) {
 /**
  * Generate quiz questions. Uses Gemini when GEMINI_API_KEY is set; otherwise a local fallback (CI / dev).
  */
-async function generateQuiz({ topic, material = '', questionCount = 10 }) {
+async function generateQuiz({ topic, material = '', questionCount = 10, language = 'English' }) {
   const n = Math.min(Math.max(Math.trunc(Number(questionCount)) || 10, 1), 20);
   const key = process.env.GEMINI_API_KEY;
 
@@ -92,6 +92,7 @@ async function generateQuiz({ topic, material = '', questionCount = 10 }) {
       topic,
       material,
       questionCount: n,
+      language,
       apiKey: key,
     });
   } catch (err) {
