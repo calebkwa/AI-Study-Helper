@@ -19,11 +19,6 @@ function createApp() {
     res.json({ name: 'ai-study-helper', version: '0.1.0' });
   });
 
-  app.get('/', (req, res) => {
-    res.send('AI Study Helper');
-  });
-
-
   app.post("/api/generate", async (req, res) => {
     try {
       const { notes, mode = "summary" } = req.body;

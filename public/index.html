@@ -1,57 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AI Study Helper</title>
-  <link rel="stylesheet" href="/styles.css" />
-</head>
-<body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Study Helper</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- Study views (Summary / Quiz / Flashcards) -->
+      <div id="view-study" class="view view--active">
+        <header class="app-header">
+          <a href="#" class="logo" id="logo-link">AI Study Helper</a>
+          <a href="#" class="link-history" id="btn-open-history">Session History</a>
+        </header>
 
-  <div class="container">
-    <h1>📚 AI Study Helper</h1>
-    <p class="subtitle">Turn your notes into clear study summaries</p>
+        <nav class="tabs" role="tablist" aria-label="Study mode">
+          <button type="button" class="tab" role="tab" data-tab="summary" aria-selected="false">
+            <span class="tab__icon" aria-hidden="true">◆</span>
+            Summary
+          </button>
+          <button type="button" class="tab tab--active" role="tab" data-tab="quiz" aria-selected="true">
+            <span class="tab__icon" aria-hidden="true">◇</span>
+            Quiz
+          </button>
+          <button type="button" class="tab" role="tab" data-tab="flashcards" aria-selected="false">
+            <span class="tab__icon" aria-hidden="true">▭</span>
+            Flashcards
+          </button>
+        </nav>
 
-    <textarea id="notes" placeholder="Paste your notes here..."></textarea>
+        <main class="main-panel">
+          <!-- Summary -->
+          <section id="panel-summary" class="panel" hidden>
+            <p class="panel-lead">Turn your notes into clear study summaries.</p>
+            <textarea id="notes" class="notes-input" placeholder="Paste your notes here..."></textarea>
+            <button type="button" class="btn btn--primary btn--block" id="btn-generate-summary">
+              Generate Notes
+            </button>
+            <div id="loading-summary" class="loading hidden">Generating…</div>
+            <div class="output-card" id="output-summary-wrap">
+              <h2 class="output-card__title">Result</h2>
+              <pre id="output-summary" class="output-card__body"></pre>
+            </div>
+          </section>
 
-    <button onclick="generateNotes()">Generate Notes</button>
+          <!-- Quiz -->
+          <section id="panel-quiz" class="panel panel--quiz">
+            <div class="quiz-status">
+              <span class="quiz-status__score" id="quiz-score-label">Score: <strong id="quiz-score-num">6</strong> / <span id="quiz-score-total">10</span></span>
+              <span class="quiz-status__q" id="quiz-q-label">Q <span id="quiz-current">3</span> of <span id="quiz-of">10</span></span>
+              <div class="quiz-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="30" id="quiz-progress-wrap">
+                <div class="quiz-progress__fill" id="quiz-progress-fill" style="width: 30%"></div>
+                <span class="quiz-progress__pct" id="quiz-progress-pct">30%</span>
+              </div>
+            </div>
 
-    <div id="loading" class="hidden">Generating...</div>
+            <div class="quiz-card">
+              <h2 class="quiz-question" id="quiz-question-text"></h2>
+              <div class="quiz-options" id="quiz-options" role="radiogroup" aria-labelledby="quiz-question-text"></div>
 
-    <div class="output-box">
-      <h2>Result</h2>
-      <pre id="output"></pre>
+              <div class="quiz-explanation" id="quiz-explanation-wrap">
+                <div class="quiz-explanation__head">
+                  <span class="quiz-explanation__bulb" aria-hidden="true">💡</span>
+                  <strong>Explanation:</strong>
+                </div>
+                <p class="quiz-explanation__text" id="quiz-explanation-text"></p>
+              </div>
+            </div>
+
+            <div class="quiz-nav">
+              <button type="button" class="btn btn--ghost" id="quiz-prev">← Previous</button>
+              <button type="button" class="btn btn--primary" id="quiz-next">Next Question →</button>
+            </div>
+          </section>
+
+          <!-- Flashcards -->
+          <section id="panel-flashcards" class="panel" hidden>
+            <p class="panel-lead">Paste notes and generate flashcards (Q&amp;A).</p>
+            <textarea id="fc-notes" class="notes-input" placeholder="Paste your notes here..."></textarea>
+            <button type="button" class="btn btn--primary btn--block" id="btn-generate-fc">Generate Flashcards</button>
+            <div id="loading-fc" class="loading hidden">Generating…</div>
+            <div class="flashcard" id="flashcard-demo" hidden>
+              <div class="flashcard__inner">
+                <p class="flashcard__q" id="fc-q">Question appears here</p>
+                <p class="flashcard__a hidden" id="fc-a">Answer appears here</p>
+              </div>
+              <button type="button" class="btn btn--secondary" id="fc-flip">Show answer</button>
+            </div>
+            <pre id="output-fc" class="output-card__body output-card__body--plain"></pre>
+          </section>
+        </main>
+      </div>
+
+      <!-- Session History -->
+      <div id="view-history" class="view view--history" hidden>
+        <header class="app-header app-header--history">
+          <a href="#" class="logo" id="btn-back-study">AI Study Helper</a>
+        </header>
+
+        <div class="history-wrap">
+          <h1 class="history-title">Session History</h1>
+          <p class="history-sub">All your past study sessions — click any card to reload.</p>
+
+          <div class="history-toolbar">
+            <div class="search-wrap">
+              <span class="search-wrap__icon" aria-hidden="true">🔍</span>
+              <input type="search" id="session-search" class="search-input" placeholder="Search sessions..." autocomplete="off" />
+            </div>
+            <div class="filter-wrap">
+              <button type="button" class="btn btn--filter" id="btn-filter" aria-haspopup="true" aria-expanded="false">
+                Filter <span class="caret" aria-hidden="true">▾</span>
+              </button>
+              <ul class="filter-menu hidden" id="filter-menu" role="menu">
+                <li><button type="button" data-filter="all" role="menuitem">All modes</button></li>
+                <li><button type="button" data-filter="Quiz" role="menuitem">Quiz</button></li>
+                <li><button type="button" data-filter="Flashcards" role="menuitem">Flashcards</button></li>
+                <li><button type="button" data-filter="Summary" role="menuitem">Summary</button></li>
+              </ul>
+            </div>
+          </div>
+
+          <ul class="session-list" id="session-list"></ul>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <script>
-    async function generateNotes() {
-      const notes = document.getElementById("notes").value;
-      const output = document.getElementById("output");
-      const loading = document.getElementById("loading");
-
-      output.textContent = "";
-      loading.classList.remove("hidden");
-
-      try {
-        const res = await fetch("/api/generate", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ notes })
-        });
-
-        const data = await res.json();
-        output.textContent = data.result;
-
-      } catch (err) {
-        output.textContent = "Error generating notes.";
-      }
-
-      loading.classList.add("hidden");
-    }
-  </script>
-
-</body>
+    <script src="/app.js" defer></script>
+  </body>
 </html>
