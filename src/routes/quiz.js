@@ -7,7 +7,7 @@ const { scoreQuizAnswers } = require('../services/scoreQuizAnswers');
 const router = express.Router();
 
 router.post('/generate', async (req, res) => {
-  const { topic, material = '', questionCount = 5 } = req.body || {};
+  const { topic, material = '', questionCount } = req.body || {};
 
   if (typeof topic !== 'string' || !topic.trim()) {
     return res.status(400).json({ error: 'topic is required (non-empty string)' });
@@ -16,7 +16,7 @@ router.post('/generate', async (req, res) => {
   const count = Number(questionCount);
   const n = Number.isFinite(count)
     ? Math.min(Math.max(Math.trunc(count), 1), 20)
-    : 5;
+    : 10;
 
   try {
     const { questions } = await generateQuiz({

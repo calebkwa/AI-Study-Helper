@@ -6,7 +6,7 @@ const uploadRoutes = require("./routes/upload");
 
 const generateNotes = require("./geminiService");
 const { saveSession, listSessions } = require("./services/sessionStore");
-const { buildFlashcardPrompt } = require("./services/flashcards");
+const { buildFlashcardPrompt, parseFlashcardResponse } = require("./services/flashcards");
 
 
 function createApp() {
@@ -67,6 +67,13 @@ function createApp() {
         date: new Date(),
       });
 
+      if (mode === "flashcards") {
+        const { cards } = parseFlashcardResponse(output);
+        return res.json({
+          result: output,
+          cards,
+        });
+      }
 
       res.json({
         result: output

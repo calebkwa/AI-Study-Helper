@@ -2,50 +2,6 @@
  * AI Study Helper — Screens 01–05: landing, input, summary results, quiz, history
  */
 
-const LOCAL_QUIZ = [
-  {
-    id: 'q-1',
-    question: 'Where do the light-dependent reactions of photosynthesis occur?',
-    options: [
-      'In the stroma of the chloroplast',
-      'In the thylakoid membrane',
-      'In the cytoplasm of the cell',
-      'In the mitochondria',
-    ],
-    correctIndex: 1,
-    explanation:
-      'The thylakoid membranes contain chlorophyll and other pigments that absorb light, driving the light-dependent reactions.',
-  },
-  {
-    id: 'q-2',
-    question: 'Which gas is taken in by plants during photosynthesis?',
-    options: ['Oxygen', 'Nitrogen', 'Carbon dioxide', 'Hydrogen'],
-    correctIndex: 2,
-    explanation: 'Plants use CO₂ with water to build sugars in the Calvin cycle.',
-  },
-  {
-    id: 'q-3',
-    question: 'What is the primary output of the light-dependent reactions?',
-    options: ['Only glucose', 'ATP, NADPH, and O₂', 'Only CO₂', 'DNA'],
-    correctIndex: 1,
-    explanation: 'Light reactions produce ATP and NADPH and release O₂ from water splitting.',
-  },
-  {
-    id: 'q-4',
-    question: 'Where does the Calvin cycle occur?',
-    options: ['Thylakoid', 'Stroma', 'Nucleus', 'Mitochondria'],
-    correctIndex: 1,
-    explanation: 'Carbon fixation happens in the stroma of the chloroplast.',
-  },
-  {
-    id: 'q-5',
-    question: 'What pigment absorbs light for photosynthesis?',
-    options: ['Hemoglobin', 'Chlorophyll', 'Melanin', 'Keratin'],
-    correctIndex: 1,
-    explanation: 'Chlorophyll captures photon energy to drive electron transport.',
-  },
-];
-
 const letters = ['A', 'B', 'C', 'D'];
 
 let quizApiMode = false;
@@ -57,6 +13,11 @@ let currentQuizIndex = 0;
 
 let lastSummaryNotes = '';
 let lastSummaryResult = '';
+
+/** @type {Array<{ question: string, answer: string }>} */
+let flashcardDeck = [];
+let flashcardIndex = 0;
+let flashcardShowAnswer = false;
 
 const el = (id) => document.getElementById(id);
 
@@ -111,6 +72,87 @@ function splitSummaryBlocks(text) {
     process: lines.slice(a, b).join('\n'),
     outputs: lines.slice(b).join('\n') || '—',
   };
+}
+
+/** Keep in sync with src/services/flashcards.js (normalizeFlashcardMarkdown + parseFlashcardResponse). */
+function normalizeFlashcardMarkdownClient(raw) {
+  let t = String(raw ?? '').replace(/\r\n/g, '\n');
+  t = t.replace(/^#{1,6}\s*.+$/gm, '');
+  t = t.replace(/\*\*/g, '');
+  t = t.replace(/\n{3,}/g, '\n\n');
+  return t.trim();
+}
+
+/** @returns {Array<{ question: string, answer: string }>} */
+function parseFlashcardsFromText(text) {
+  const raw = normalizeFlashcardMarkdownClient(text);
+  if (!raw) return [];
+
+  const cards = [];
+  const blocks = raw.split(/\n{2,}/);
+  for (const block of blocks) {
+    const lines = block.split('\n').map((l) => l.trim()).filter(Boolean);
+    for (let i = 0; i < lines.length; i += 1) {
+      const qMatch = /^Q(?:uestion)?\s*:\s*(.+)$/i.exec(lines[i]);
+      if (qMatch && i + 1 < lines.length) {
+        const aMatch = /^A(?:nswer)?\s*:\s*(.+)$/i.exec(lines[i + 1]);
+        if (aMatch) {
+          cards.push({
+            question: qMatch[1].trim(),
+            answer: aMatch[1].trim(),
+          });
+          i += 1;
+        }
+      }
+    }
+  }
+
+  if (cards.length > 0) return cards;
+
+  const allLines = raw.split('\n').map((l) => l.trim()).filter(Boolean);
+  for (let i = 0; i + 1 < allLines.length; i += 2) {
+    cards.push({ question: allLines[i], answer: allLines[i + 1] });
+  }
+
+  if (cards.length > 0) return cards;
+
+  return [{ question: raw.slice(0, 200), answer: raw.length > 200 ? raw.slice(200) : '—' }];
+}
+
+function applyFlashcardDeck(cards) {
+  flashcardDeck = Array.isArray(cards) ? cards.filter((c) => c && (c.question || c.answer)) : [];
+  if (flashcardDeck.length === 0) {
+    flashcardDeck = [
+      {
+        question: 'No flashcards could be parsed.',
+        answer: 'Try generating again, or use clearer Q:/A: pairs in the model output.',
+      },
+    ];
+  }
+  flashcardIndex = 0;
+  flashcardShowAnswer = false;
+  renderFlashcard();
+  el('panel-flash-inline').classList.remove('hidden');
+}
+
+function renderFlashcard() {
+  const total = flashcardDeck.length || 1;
+  const card = flashcardDeck[flashcardIndex] || { question: '', answer: '' };
+  el('fc-q').textContent = card.question || '';
+  el('fc-a').textContent = card.answer || '';
+  el('fc-q').classList.toggle('hidden', flashcardShowAnswer);
+  el('fc-a').classList.toggle('hidden', !flashcardShowAnswer);
+  el('fc-face-label').textContent = flashcardShowAnswer ? 'Answer' : 'Question';
+  el('fc-flip').textContent = flashcardShowAnswer ? 'Show question' : 'Show answer';
+  el('fc-num').textContent = String(flashcardIndex + 1);
+  el('fc-of').textContent = String(total);
+  const pct = Math.round(((flashcardIndex + 1) / total) * 100);
+  el('fc-progress-fill').style.width = `${pct}%`;
+  const wrap = el('fc-progress-wrap');
+  wrap.setAttribute('aria-valuenow', String(flashcardIndex + 1));
+  wrap.setAttribute('aria-valuemax', String(total));
+  el('fc-prev').disabled = flashcardIndex <= 0;
+  el('fc-next').disabled = flashcardIndex >= flashcardDeck.length - 1;
 }
 
 function setInputTab(name) {
@@ -252,40 +294,35 @@ function goQuiz(delta) {
   renderQuizQuestion();
 }
 
-function startLocalQuiz() {
-  quizApiMode = false;
-  quizId = null;
-  quizItems = LOCAL_QUIZ.map((x) => ({ ...x }));
+function parseMaxQuestions() {
+  const raw = el('max-questions')?.value;
+  const n = Number.parseInt(String(raw ?? '10'), 10);
+  return Number.isFinite(n) ? Math.min(Math.max(n, 1), 20) : 10;
+}
+
+async function startQuizFromApi(topic, material, count) {
+  const questionCount = Number.isFinite(count) ? Math.min(Math.max(count, 1), 20) : parseMaxQuestions();
+  const res = await fetch('/api/quiz/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      topic,
+      material,
+      questionCount,
+    }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.message || data.error || 'Quiz generation failed');
+  }
+
+  quizApiMode = true;
+  quizId = data.quizId;
+  quizItems = data.questions;
   quizAnswers = quizItems.map(() => null);
   currentQuizIndex = 0;
   showWorkspaceScreen('quiz');
   renderQuizQuestion();
-}
-
-async function startQuizFromApi(topic, material, count) {
-  try {
-    const res = await fetch('/api/quiz/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        topic,
-        material,
-        questionCount: count,
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Quiz failed');
-
-    quizApiMode = true;
-    quizId = data.quizId;
-    quizItems = data.questions;
-    quizAnswers = quizItems.map(() => null);
-    currentQuizIndex = 0;
-    showWorkspaceScreen('quiz');
-    renderQuizQuestion();
-  } catch {
-    startLocalQuiz();
-  }
 }
 
 async function postGenerate(notes, mode, language) {
@@ -296,7 +333,7 @@ async function postGenerate(notes, mode, language) {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || res.statusText);
-  return data.result;
+  return data;
 }
 
 function showSummaryResults(notes, result) {
@@ -359,7 +396,7 @@ async function renderSessions() {
   }
 
   sessions
-    .filter((s) => sessionMatchesFilter(s, filterTag))
+    .filter((s) => sessionMatchesFilter(s))
     .filter((s) => !query || titleFromSession(s).toLowerCase().includes(query))
     .forEach((s) => {
       const { tag, tagClass } = tagForMode(s.mode);
@@ -471,25 +508,31 @@ async function onGenerateMain() {
         alert('Paste some notes first.');
         return;
       }
-      const result = await postGenerate(notes, 'summary', language);
-      showSummaryResults(notes, result);
+      const data = await postGenerate(notes, 'summary', language);
+      showSummaryResults(notes, data.result);
     } else if (tab === 'quiz') {
-      const topic = notes.split('\n')[0]?.slice(0, 200) || 'General study topic';
-      const count = parseInt(el('max-questions').value, 10) || 10;
-      await startQuizFromApi(topic, notes, count);
+      if (!notes) {
+        alert('Paste some notes first.');
+        return;
+      }
+      const topic =
+        notes
+          .split('\n')
+          .map((l) => l.trim())
+          .find(Boolean)
+          ?.slice(0, 200) || 'Study topic';
+      await startQuizFromApi(topic, notes, parseMaxQuestions());
     } else {
       if (!notes) {
         alert('Paste some notes first.');
         return;
       }
-      const text = await postGenerate(notes, 'flashcards', language);
-      el('output-fc').textContent = text;
-      const lines = text.split('\n').filter(Boolean);
-      el('fc-q').textContent = lines[0] || 'Flashcards';
-      el('fc-a').textContent = lines[1] || '';
-      el('fc-a').classList.add('hidden');
-      el('fc-flip').textContent = 'Show answer';
-      el('panel-flash-inline').classList.remove('hidden');
+      const data = await postGenerate(notes, 'flashcards', language);
+      const cards =
+        Array.isArray(data.cards) && data.cards.length > 0
+          ? data.cards
+          : parseFlashcardsFromText(data.result || '');
+      applyFlashcardDeck(cards);
     }
   } catch {
     alert('Something went wrong. Try again.');
@@ -560,9 +603,22 @@ function init() {
   el('quiz-next').addEventListener('click', () => goQuiz(1));
 
   el('fc-flip').addEventListener('click', () => {
-    const a = el('fc-a');
-    const hidden = a.classList.toggle('hidden');
-    el('fc-flip').textContent = hidden ? 'Show answer' : 'Hide answer';
+    flashcardShowAnswer = !flashcardShowAnswer;
+    renderFlashcard();
+  });
+
+  el('fc-prev').addEventListener('click', () => {
+    if (flashcardIndex <= 0) return;
+    flashcardIndex -= 1;
+    flashcardShowAnswer = false;
+    renderFlashcard();
+  });
+
+  el('fc-next').addEventListener('click', () => {
+    if (flashcardIndex >= flashcardDeck.length - 1) return;
+    flashcardIndex += 1;
+    flashcardShowAnswer = false;
+    renderFlashcard();
   });
 
   document.querySelectorAll('[data-results-tab]').forEach((btn) => {
@@ -574,8 +630,11 @@ function init() {
       if (name === 'summary') {
         showWorkspaceScreen('summary-results');
       } else if (name === 'quiz') {
-        if (quizItems.length === 0) startLocalQuiz();
-        else showWorkspaceScreen('quiz');
+        if (quizItems.length === 0) {
+          showWorkspaceScreen('input');
+          setInputTab('quiz');
+          alert('Generate a quiz from Study Workspace first.');
+        } else showWorkspaceScreen('quiz');
       } else {
         showWorkspaceScreen('input');
         setInputTab('flashcards');
