@@ -33,6 +33,38 @@ function showWorkspaceScreen(screen) {
   el('screen-summary-results').classList.toggle('hidden', screen !== 'summary-results');
   el('screen-quiz').classList.toggle('hidden', screen !== 'quiz');
   el('btn-new-session').classList.toggle('hidden', screen !== 'summary-results');
+  if (screen === 'quiz') {
+    syncQuizCompleteView();
+  }
+}
+
+function syncQuizCompleteView() {
+  const workflow = el('quiz-workflow');
+  const complete = el('quiz-complete');
+  if (!workflow || !complete) return;
+  const done = quizRunComplete;
+  workflow.classList.toggle('hidden', done);
+  complete.classList.toggle('hidden', !done);
+}
+
+function showQuizComplete() {
+  const correct = getCorrectCount();
+  const total = quizItems.length || 1;
+  const pct = Math.round((correct / total) * 100);
+  el('quiz-complete-num').textContent = String(correct);
+  el('quiz-complete-total').textContent = String(total);
+  el('quiz-complete-pct').textContent = `${pct}%`;
+  const msg = el('quiz-complete-msg');
+  if (pct >= 80) msg.textContent = 'Strong work — you have a solid grasp of this material.';
+  else if (pct >= 50) msg.textContent = 'Good effort. Review the explanations for any misses.';
+  else msg.textContent = 'Keep studying — revisit your notes and try another quiz when ready.';
+  quizRunComplete = true;
+  syncQuizCompleteView();
+}
+
+function exitQuizComplete() {
+  quizRunComplete = false;
+  syncQuizCompleteView();
 }
 
 function openAbout() {
