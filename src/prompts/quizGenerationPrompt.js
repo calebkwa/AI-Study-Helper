@@ -1,7 +1,7 @@
 /**
  * System + user instructions for Gemini to return strict JSON quiz shape.
  */
-function buildQuizGenerationPrompt({ topic, material, questionCount }) {
+function buildQuizGenerationPrompt({ topic, material, questionCount, language = 'English' }) {
   const n = questionCount;
   const contextBlock = material.trim()
     ? `Study material / notes (use only as source when relevant):\n${material.trim()}\n\n`
@@ -10,6 +10,9 @@ function buildQuizGenerationPrompt({ topic, material, questionCount }) {
   return `${contextBlock}You are an educational assistant. Create exactly ${n} distinct multiple-choice quiz questions about this topic:
 
 Topic: ${topic.trim()}
+
+Language:
+- Write every question, every answer option, and every explanation string entirely in ${language}. Do not use English unless ${language} is English.
 
 Requirements:
 - Each question has exactly 4 answer options (short phrases, no "A)" prefixes).

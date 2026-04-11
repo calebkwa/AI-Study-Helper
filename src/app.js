@@ -43,7 +43,7 @@ function createApp() {
       let prompt;
 
       if (mode === "summary") {
-        prompt = `Summarize into short bullet points in ${language}:\n\n${notes}`;
+        prompt = `Summarize the following study notes into concise bullet points (about 5–6 main points).\nOutput language: ${language}. Write the entire response in ${language} only—do not answer in English unless the notes are in English.\n\nNotes:\n${notes}`;
       }
 
       else if (mode === "flashcards") {

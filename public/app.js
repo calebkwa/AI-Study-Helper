@@ -10,6 +10,7 @@ let quizItems = [];
 /** @type {Array<null | { selectedIndex: number, correct?: boolean }>} */
 let quizAnswers = [];
 let currentQuizIndex = 0;
+let quizRunComplete = false;
 
 let lastSummaryNotes = '';
 let lastSummaryResult = '';
@@ -189,6 +190,9 @@ function updateQuizHeader() {
   el('quiz-of').textContent = String(total);
   el('quiz-progress-fill').style.width = `${progressPct}%`;
   el('quiz-progress-pct').textContent = `${progressPct}%`;
+  const nextBtn = el('quiz-next');
+  const last = idx >= total - 1;
+  nextBtn.textContent = last ? 'Finish quiz →' : 'Next question →';
 }
 
 function renderQuizQuestion() {
@@ -288,6 +292,10 @@ async function onQuizOption(index) {
 }
 
 function goQuiz(delta) {
+  if (delta === 1 && currentQuizIndex === quizItems.length - 1) {
+    showQuizComplete();
+    return;
+  }
   const next = currentQuizIndex + delta;
   if (next < 0 || next >= quizItems.length) return;
   currentQuizIndex = next;
@@ -300,8 +308,9 @@ function parseMaxQuestions() {
   return Number.isFinite(n) ? Math.min(Math.max(n, 1), 20) : 10;
 }
 
-async function startQuizFromApi(topic, material, count) {
+async function startQuizFromApi(topic, material, count, language) {
   const questionCount = Number.isFinite(count) ? Math.min(Math.max(count, 1), 20) : parseMaxQuestions();
+  const lang = typeof language === 'string' ? language : el('language-main')?.value || 'English';
   const res = await fetch('/api/quiz/generate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -309,6 +318,7 @@ async function startQuizFromApi(topic, material, count) {
       topic,
       material,
       questionCount,
+      language: lang,
     }),
   });
   const data = await res.json().catch(() => ({}));
@@ -321,6 +331,7 @@ async function startQuizFromApi(topic, material, count) {
   quizItems = data.questions;
   quizAnswers = quizItems.map(() => null);
   currentQuizIndex = 0;
+  quizRunComplete = false;
   showWorkspaceScreen('quiz');
   renderQuizQuestion();
 }
@@ -521,7 +532,7 @@ async function onGenerateMain() {
           .map((l) => l.trim())
           .find(Boolean)
           ?.slice(0, 200) || 'Study topic';
-      await startQuizFromApi(topic, notes, parseMaxQuestions());
+      await startQuizFromApi(topic, notes, parseMaxQuestions(), language);
     } else {
       if (!notes) {
         alert('Paste some notes first.');
@@ -541,8 +552,26 @@ async function onGenerateMain() {
   }
 }
 
+function applyOutputLanguageUi() {
+  const lang = el('language-main')?.value || 'English';
+  const root = document.documentElement;
+  if (lang === 'Arabic') {
+    root.setAttribute('dir', 'rtl');
+    root.setAttribute('lang', 'ar');
+  } else if (lang === 'French') {
+    root.setAttribute('dir', 'ltr');
+    root.setAttribute('lang', 'fr');
+  } else {
+    root.setAttribute('dir', 'ltr');
+    root.setAttribute('lang', 'en');
+  }
+}
+
 function init() {
   document.body.classList.add('js-ready');
+
+  el('language-main')?.addEventListener('change', applyOutputLanguageUi);
+  applyOutputLanguageUi();
 
   el('btn-start-studying').addEventListener('click', enterWorkspace);
   el('btn-landing-get-started').addEventListener('click', enterWorkspace);
@@ -601,6 +630,28 @@ function init() {
 
   el('quiz-prev').addEventListener('click', () => goQuiz(-1));
   el('quiz-next').addEventListener('click', () => goQuiz(1));
+
+  el('quiz-complete-review').addEventListener('click', () => {
+    exitQuizComplete();
+    currentQuizIndex = 0;
+    renderQuizQuestion();
+  });
+
+  el('quiz-complete-summary').addEventListener('click', () => {
+    if (lastSummaryNotes) {
+      showWorkspaceScreen('summary-results');
+    } else {
+      showWorkspaceScreen('input');
+      setInputTab('summary');
+    }
+  });
+
+  el('quiz-complete-notes').addEventListener('click', () => {
+    exitQuizComplete();
+    el('notes-main').value = '';
+    showWorkspaceScreen('input');
+    setInputTab('quiz');
+  });
 
   el('fc-flip').addEventListener('click', () => {
     flashcardShowAnswer = !flashcardShowAnswer;

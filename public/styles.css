@@ -17,6 +17,10 @@
   --font: "Inter", system-ui, -apple-system, sans-serif;
 }
 
+html[lang="ar"] {
+  --font: "Noto Sans Arabic", "Inter", system-ui, -apple-system, sans-serif;
+}
+
 *,
 *::before,
 *::after {
@@ -431,6 +435,85 @@ body {
 
 .quiz-nav .btn {
   min-width: 160px;
+}
+
+/* Quiz completion */
+.quiz-complete {
+  margin-top: 0.5rem;
+}
+
+.quiz-complete__card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  border: 1px solid #e5e7eb;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.quiz-complete__badge {
+  display: inline-block;
+  margin: 0 0 0.75rem;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-primary);
+  background: var(--color-explain-bg);
+  border-radius: var(--radius-pill);
+}
+
+.quiz-complete__title {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.quiz-complete__scoreline {
+  margin: 0 0 0.5rem;
+  font-size: 1.0625rem;
+  color: var(--color-text);
+}
+
+.quiz-complete__scoreline strong {
+  color: var(--color-primary);
+  font-size: 1.25rem;
+}
+
+.quiz-complete__pct {
+  margin: 0 0 1rem;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-success);
+}
+
+.quiz-complete__msg {
+  margin: 0 0 1.5rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+.quiz-complete__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  align-items: stretch;
+}
+
+@media (min-width: 520px) {
+  .quiz-complete__actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .quiz-complete__actions .btn {
+    min-width: 140px;
+  }
 }
 
 /* Flashcard deck (aligned with quiz + summary cards) */

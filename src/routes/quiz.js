@@ -7,7 +7,7 @@ const { scoreQuizAnswers } = require('../services/scoreQuizAnswers');
 const router = express.Router();
 
 router.post('/generate', async (req, res) => {
-  const { topic, material = '', questionCount } = req.body || {};
+  const { topic, material = '', questionCount, language = 'English' } = req.body || {};
 
   if (typeof topic !== 'string' || !topic.trim()) {
     return res.status(400).json({ error: 'topic is required (non-empty string)' });
@@ -23,6 +23,7 @@ router.post('/generate', async (req, res) => {
       topic: topic.trim(),
       material: typeof material === 'string' ? material : '',
       questionCount: n,
+      language: typeof language === 'string' ? language : 'English',
     });
 
     const answerKey = Object.fromEntries(

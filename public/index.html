@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/styles.css" />
@@ -202,29 +202,49 @@
           <button type="button" class="tab" data-quiz-nav="flashcards">Flashcards</button>
         </nav>
 
-        <div class="quiz-status">
-          <span class="quiz-status__score">Score: <strong id="quiz-score-num">0</strong> / <span id="quiz-score-total">10</span></span>
-          <span class="quiz-status__q">Q <span id="quiz-current">1</span> of <span id="quiz-of">10</span></span>
-          <div class="quiz-progress" id="quiz-progress-wrap" role="progressbar" aria-valuenow="10">
-            <div class="quiz-progress__fill" id="quiz-progress-fill" style="width: 10%"></div>
-            <span class="quiz-progress__pct" id="quiz-progress-pct">10%</span>
+        <div id="quiz-workflow">
+          <div class="quiz-status">
+            <span class="quiz-status__score">Score: <strong id="quiz-score-num">0</strong> / <span id="quiz-score-total">10</span></span>
+            <span class="quiz-status__q">Q <span id="quiz-current">1</span> of <span id="quiz-of">10</span></span>
+            <div class="quiz-progress" id="quiz-progress-wrap" role="progressbar" aria-valuenow="10">
+              <div class="quiz-progress__fill" id="quiz-progress-fill" style="width: 10%"></div>
+              <span class="quiz-progress__pct" id="quiz-progress-pct">10%</span>
+            </div>
+          </div>
+
+          <div class="quiz-card">
+            <h2 class="quiz-question" id="quiz-question-text"></h2>
+            <div class="quiz-options" id="quiz-options" role="radiogroup"></div>
+            <div class="quiz-explanation hidden" id="quiz-explanation-wrap">
+              <div class="quiz-explanation__head">
+                <span class="quiz-explanation__bulb">💡</span>
+                <strong>Explanation:</strong>
+              </div>
+              <p class="quiz-explanation__text" id="quiz-explanation-text"></p>
+            </div>
+          </div>
+          <div class="quiz-nav">
+            <button type="button" class="btn btn--ghost" id="quiz-prev">← Previous</button>
+            <button type="button" class="btn btn--primary" id="quiz-next">Next Question →</button>
           </div>
         </div>
 
-        <div class="quiz-card">
-          <h2 class="quiz-question" id="quiz-question-text"></h2>
-          <div class="quiz-options" id="quiz-options" role="radiogroup"></div>
-          <div class="quiz-explanation hidden" id="quiz-explanation-wrap">
-            <div class="quiz-explanation__head">
-              <span class="quiz-explanation__bulb">💡</span>
-              <strong>Explanation:</strong>
+        <div id="quiz-complete" class="quiz-complete hidden" aria-live="polite">
+          <div class="quiz-complete__card">
+            <p class="quiz-complete__badge">Done</p>
+            <h2 class="quiz-complete__title">Quiz complete</h2>
+            <p class="quiz-complete__scoreline">
+              You scored <strong id="quiz-complete-num">0</strong> out of
+              <span id="quiz-complete-total">0</span>
+            </p>
+            <p class="quiz-complete__pct" id="quiz-complete-pct">0%</p>
+            <p class="quiz-complete__msg" id="quiz-complete-msg"></p>
+            <div class="quiz-complete__actions">
+              <button type="button" class="btn btn--ghost" id="quiz-complete-review">Review answers</button>
+              <button type="button" class="btn btn--secondary" id="quiz-complete-summary">Back to summary</button>
+              <button type="button" class="btn btn--primary" id="quiz-complete-notes">New session</button>
             </div>
-            <p class="quiz-explanation__text" id="quiz-explanation-text"></p>
           </div>
-        </div>
-        <div class="quiz-nav">
-          <button type="button" class="btn btn--ghost" id="quiz-prev">← Previous</button>
-          <button type="button" class="btn btn--primary" id="quiz-next">Next Question →</button>
         </div>
       </div>
     </div>
