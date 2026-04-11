@@ -127,16 +127,33 @@
 
         <div id="loading-main" class="loading hidden">Generating…</div>
 
-        <!-- Flashcards inline result (small) -->
+        <!-- Flashcards: deck UI (matches quiz / summary styling) -->
         <div id="panel-flash-inline" class="panel-flash-inline hidden">
-          <div class="flashcard" id="flashcard-demo">
-            <div class="flashcard__inner">
-              <p class="flashcard__q" id="fc-q">Question</p>
-              <p class="flashcard__a hidden" id="fc-a">Answer</p>
+          <div class="flashdeck-status" aria-live="polite">
+            <span class="flashdeck-status__card">Card <strong id="fc-num">1</strong> of <span id="fc-of">1</span></span>
+            <div
+              class="flashdeck-progress"
+              id="fc-progress-wrap"
+              role="progressbar"
+              aria-valuemin="1"
+              aria-valuenow="1"
+              aria-valuemax="1"
+            >
+              <div class="flashdeck-progress__fill" id="fc-progress-fill" style="width: 100%"></div>
             </div>
-            <button type="button" class="btn btn--secondary" id="fc-flip">Show answer</button>
           </div>
-          <pre id="output-fc" class="output-card__body output-card__body--plain"></pre>
+          <div class="flashdeck-card-wrap">
+            <div class="flashdeck-card" id="flashdeck-card">
+              <p class="flashdeck-card__label" id="fc-face-label">Question</p>
+              <p class="flashdeck-card__text" id="fc-q"></p>
+              <p class="flashdeck-card__text flashdeck-card__text--answer hidden" id="fc-a"></p>
+            </div>
+            <button type="button" class="btn btn--secondary btn--block" id="fc-flip">Show answer</button>
+          </div>
+          <div class="flashdeck-nav">
+            <button type="button" class="btn btn--ghost" id="fc-prev">← Previous</button>
+            <button type="button" class="btn btn--primary" id="fc-next">Next card →</button>
+          </div>
         </div>
       </div>
 

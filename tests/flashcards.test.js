@@ -23,6 +23,21 @@ A: Paris`;
       expect(cards[1]).toEqual({ question: 'Capital of France?', answer: 'Paris' });
     });
 
+    it('parses markdown-style **Q:** / **A:** and headers from model output', () => {
+      const text = `### Flashcards (Q&A Format)
+
+**Q:** What are the three practices?
+**A:** Continuous Integration, Continuous Delivery, and Continuous Deployment.
+
+**Q:** What is the goal of CI?
+**A:** Quick feedback on code integration.`;
+      const { cards } = parseFlashcardResponse(text);
+      expect(cards.length).toBeGreaterThanOrEqual(2);
+      expect(cards[0].question).toContain('three practices');
+      expect(cards[0].answer).toContain('Continuous Integration');
+      expect(cards[1].question).toContain('goal of CI');
+    });
+
     it('parses Question:/Answer: labels', () => {
       const text = `Question: First?
 Answer: One`;

@@ -433,28 +433,106 @@ body {
   min-width: 160px;
 }
 
-/* Flashcards */
-.flashcard {
-  margin-top: 1.5rem;
-  padding: 1.5rem;
-  background: #f9fafb;
+/* Flashcard deck (aligned with quiz + summary cards) */
+.flashdeck-status {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--color-explain-bg);
+  border: 1px solid var(--color-explain-border);
   border-radius: var(--radius-md);
-  border: 1px solid #e5e7eb;
+  margin-bottom: 1.25rem;
 }
 
-.flashcard__inner {
-  min-height: 120px;
+@media (max-width: 640px) {
+  .flashdeck-status {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+}
+
+.flashdeck-status__card {
+  font-size: 0.9375rem;
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.flashdeck-status__card strong {
+  font-weight: 700;
+}
+
+.flashdeck-progress {
+  position: relative;
+  height: 1.75rem;
+  background: #e5e7eb;
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  min-width: 140px;
+  justify-self: end;
+}
+
+.flashdeck-progress__fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: var(--color-primary);
+  border-radius: var(--radius-pill);
+  transition: width 0.2s ease;
+}
+
+.flashdeck-card-wrap {
+  margin-bottom: 1.25rem;
+}
+
+.flashdeck-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  border: 1px solid #e5e7eb;
+  padding: 1.5rem 1.25rem;
+  min-height: 160px;
   margin-bottom: 1rem;
 }
 
-.flashcard__q {
+.flashdeck-card__label {
+  font-size: 0.75rem;
   font-weight: 600;
-  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  margin: 0 0 0.65rem;
 }
 
-.flashcard__a {
-  margin: 0.75rem 0 0;
+.flashdeck-card__text {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--color-text);
+}
+
+.flashdeck-card__text--answer {
+  font-weight: 500;
   color: var(--color-primary);
+}
+
+.flashdeck-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.flashdeck-nav .btn {
+  min-width: 140px;
+}
+
+.flashdeck-nav .btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 /* Session History */

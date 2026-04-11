@@ -79,8 +79,8 @@ async function generateWithGemini({ topic, material, questionCount, apiKey }) {
 /**
  * Generate quiz questions. Uses Gemini when GEMINI_API_KEY is set; otherwise a local fallback (CI / dev).
  */
-async function generateQuiz({ topic, material = '', questionCount = 5 }) {
-  const n = Math.min(Math.max(Math.trunc(Number(questionCount)) || 5, 1), 20);
+async function generateQuiz({ topic, material = '', questionCount = 10 }) {
+  const n = Math.min(Math.max(Math.trunc(Number(questionCount)) || 10, 1), 20);
   const key = process.env.GEMINI_API_KEY;
 
   if (!key) {
@@ -95,9 +95,8 @@ async function generateQuiz({ topic, material = '', questionCount = 5 }) {
       apiKey: key,
     });
   } catch (err) {
-    const wrapped = new Error('Gemini quiz generation failed');
-    wrapped.cause = err;
-    throw wrapped;
+    console.error('Gemini quiz generation failed; using topic-based fallback', err);
+    return buildFallbackQuiz(topic, n);
   }
 }
 

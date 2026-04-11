@@ -1,11 +1,22 @@
 /**
+ * Strip common markdown from model output so Q:/A: patterns match reliably.
+ */
+function normalizeFlashcardMarkdown(raw) {
+  let t = String(raw ?? '').replace(/\r\n/g, '\n');
+  t = t.replace(/^#{1,6}\s*.+$/gm, '');
+  t = t.replace(/\*\*/g, '');
+  t = t.replace(/\n{3,}/g, '\n\n');
+  return t.trim();
+}
+
+/**
  * Parse flashcard-style Q&A text (e.g. from Gemini) into structured cards.
  *
  * @param {string} text
  * @returns {{ cards: Array<{ question: string, answer: string }> }}
  */
 function parseFlashcardResponse(text) {
-  const raw = String(text ?? '').trim();
+  const raw = normalizeFlashcardMarkdown(text);
   if (!raw) {
     return { cards: [] };
   }
@@ -55,5 +66,6 @@ function buildFlashcardPrompt(notes, language = 'English') {
 
 module.exports = {
   parseFlashcardResponse,
+  normalizeFlashcardMarkdown,
   buildFlashcardPrompt,
 };
