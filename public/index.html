@@ -40,7 +40,13 @@
           <!-- Summary -->
           <section id="panel-summary" class="panel" hidden>
             <p class="panel-lead">Turn your notes into clear study summaries.</p>
+            <input type="file" id="fileUploadSummary" accept=".txt" />
             <textarea id="notes" class="notes-input" placeholder="Paste your notes here..."></textarea>
+            <select id="language">
+              <option value="English">English</option>
+              <option value="Arabic">Arabic</option>
+              <option value="French">French</option>
+            </select>
             <button type="button" class="btn btn--primary btn--block" id="btn-generate-summary">
               Generate Notes
             </button>
@@ -84,7 +90,15 @@
           <!-- Flashcards -->
           <section id="panel-flashcards" class="panel" hidden>
             <p class="panel-lead">Paste notes and generate flashcards (Q&amp;A).</p>
+            <input type="file" id="fileUploadFlashcards" accept=".txt" />
+
             <textarea id="fc-notes" class="notes-input" placeholder="Paste your notes here..."></textarea>
+
+            <select id="language-fc">
+              <option value="English">English</option>
+              <option value="Arabic">Arabic</option>
+              <option value="French">French</option>
+            </select>
             <button type="button" class="btn btn--primary btn--block" id="btn-generate-fc">Generate Flashcards</button>
             <div id="loading-fc" class="loading hidden">Generating…</div>
             <div class="flashcard" id="flashcard-demo" hidden>

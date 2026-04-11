@@ -338,43 +338,51 @@ function closeHistory() {
 }
 
 /* API */
-async function postGenerate(notes, mode) {
+async function postGenerate(notes, mode, language) {
   const res = await fetch('/api/generate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ notes, mode }),
+    body: JSON.stringify({ notes, mode, language }),
   });
+
   const data = await res.json().catch(() => ({}));
+
   if (!res.ok) {
     throw new Error(data.error || res.statusText);
   }
+
   return data.result;
 }
 
 async function generateSummary() {
   const notes = el('notes').value;
+  const language = el('language').value;
+
   const out = el('output-summary');
   const loading = el('loading-summary');
+
   out.textContent = '';
   loading.classList.remove('hidden');
+
   try {
-    out.textContent = await postGenerate(notes, 'summary');
+    out.textContent = await postGenerate(notes, 'summary', language);
   } catch {
     out.textContent = 'Could not generate summary. Try again.';
   }
+
   loading.classList.add('hidden');
 }
 
 async function generateFlashcards() {
   const notes = el('fc-notes').value;
-  const out = el('output-fc');
+  const language = el('language-fc').value;  const out = el('output-fc');
   const loading = el('loading-fc');
   const fc = el('flashcard-demo');
   out.textContent = '';
   fc.hidden = true;
   loading.classList.remove('hidden');
   try {
-    const text = await postGenerate(notes, 'flashcards');
+    const text = await postGenerate(notes, 'flashcards', language);
     out.textContent = text;
     const lines = text.split('\n').filter(Boolean);
     el('fc-q').textContent = lines[0] || 'Flashcards generated — see text below.';
