@@ -20,8 +20,9 @@ Requirements:
 Output rules (critical):
 - Respond with ONLY valid JSON. No markdown, no code fences, no commentary.
 - Use this exact JSON shape:
-{"questions":[{"question":"string","options":["string","string","string","string"],"correctIndex":0}]}
+{"questions":[{"question":"string","options":["string","string","string","string"],"correctIndex":0,"explanation":"one short sentence why the correct option is right"}]}
 - correctIndex is an integer from 0 to 3 (index into options).
+- explanation must be a non-empty string for each question.
 - The "questions" array length must be exactly ${n}.`;
 }
 

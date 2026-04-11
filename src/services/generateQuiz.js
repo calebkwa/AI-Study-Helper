@@ -26,7 +26,12 @@ function normalizeQuestion(q, index) {
     throw new Error('Invalid correctIndex');
   }
 
-  return { id, question, options, correctIndex };
+  const explanation =
+    typeof q.explanation === 'string' && q.explanation.trim()
+      ? q.explanation.trim()
+      : 'The correct option matches the topic and eliminates the distractors.';
+
+  return { id, question, options, correctIndex, explanation };
 }
 
 function normalizeQuizPayload(data, expectedCount) {
@@ -54,6 +59,7 @@ function buildFallbackQuiz(topic, questionCount) {
         'A trick option with no clear link',
       ],
       correctIndex: 0,
+      explanation: 'Option A states the main idea you should retain for this topic.',
     });
   }
   return { questions };

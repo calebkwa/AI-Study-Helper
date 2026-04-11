@@ -48,5 +48,23 @@
     "notes": "",
     "result": "Gemini is currently unavailable. Please try again later.",
     "date": "2026-04-11T17:59:23.908Z"
+  },
+  {
+    "id": "2177baf5-92ca-4ef9-8315-adf054c5607c",
+    "notes": "Question 1 (3 points)\nMention and briefly describe the main components of the iterative design process.\n• Design: Generating ideas and creating solutions to address user needs.\n• Build: Creating prototypes (from low to high fidelity) that can be tested.\n• Assess: Evaluating the prototypes through user testing and observation to gather\nfeedback.\nQuestion 2 (1 point)\nWhy is delivering a good user experience considered challenging in UI/UX design?\n• Most users are unfamiliar with modern technology\n• Designers are not the users and may not share the same needs or\nbehaviours (Correct Answer)\n• Designers typically have limited access to design tools\n• Users always have dif",
+    "result": "Gemini is currently unavailable. Please try again later.",
+    "mode": "flashcards",
+    "title": null,
+    "score": null,
+    "date": "2026-04-11T18:45:57.512Z"
+  },
+  {
+    "id": "f5f2c0e7-9357-4d7a-9767-6ee8fcf25dbc",
+    "notes": "Gemini API integration, /api/generate route, prompt engineering (Summary)\nSummary Results screen (Screen 03), Export PDF\nSession storage, /api/save, /api/history routes\nQuiz generation prompt, /api/quiz route, score logic\nQuiz Results screen (Screen 04), Session History (Screen 05)\nSupertest API tests for /api/quiz + /api/history\nLanding Page (Screen 01), Input Screen (Screen 02)\nFlashcard generation prompt, /api/upload route, language support\nUnit tests for file parser + flashcard module\nDocker, GitHub Actions CI pipeline\nRender CD pipeline, auto-deploy, branch protection",
+    "result": "Gemini is currently unavailable. Please try again later.",
+    "mode": "summary",
+    "title": null,
+    "score": null,
+    "date": "2026-04-11T19:03:00.597Z"
   }
 ]

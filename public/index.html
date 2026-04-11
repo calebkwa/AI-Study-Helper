@@ -11,138 +11,244 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/styles.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
   </head>
   <body>
-    <div id="app">
-      <!-- Study views (Summary / Quiz / Flashcards) -->
-      <div id="view-study" class="view view--active">
-        <header class="app-header">
-          <a href="#" class="logo" id="logo-link">AI Study Helper</a>
-          <a href="#" class="link-history" id="btn-open-history">Session History</a>
-        </header>
+    <!-- 01 – Landing -->
+    <div id="view-landing" class="view view--landing">
+      <header class="landing-nav">
+        <span class="logo logo--landing">AI Study Helper</span>
+        <nav class="landing-nav__links">
+          <a href="#" id="landing-nav-home">Home</a>
+          <a href="#" id="landing-nav-history">History</a>
+          <a href="#" id="landing-nav-about">About</a>
+        </nav>
+        <button type="button" class="btn btn--primary btn--sm" id="btn-landing-get-started">Get Started</button>
+      </header>
+
+      <section class="landing-hero">
+        <h1 class="landing-hero__title">From Notes to Mastery — Powered by Gemini AI</h1>
+        <p class="landing-hero__sub">
+          Paste your lecture notes and let AI generate summaries, quiz questions, and flashcards in seconds.
+        </p>
+        <div class="landing-hero__actions">
+          <button type="button" class="btn btn--white btn--lg" id="btn-start-studying">Start Studying</button>
+          <button type="button" class="btn btn--outline-light btn--lg" id="btn-see-how">See How It Works</button>
+        </div>
+      </section>
+
+      <section class="landing-features">
+        <article class="feature-card">
+          <h3 class="feature-card__title">Smart Summary</h3>
+          <p class="feature-card__text">
+            AI condenses your notes into key points and structured sections instantly.
+          </p>
+        </article>
+        <article class="feature-card">
+          <h3 class="feature-card__title">Practice Quiz</h3>
+          <p class="feature-card__text">
+            Multiple-choice questions generated from your material with instant feedback.
+          </p>
+        </article>
+        <article class="feature-card">
+          <h3 class="feature-card__title">Flashcards</h3>
+          <p class="feature-card__text">
+            Term–definition pairs for active recall — tap to reveal and self-test.
+          </p>
+        </article>
+      </section>
+    </div>
+
+    <!-- Workspace: 02 Input, 03 Summary results, 04 Quiz, Flashcards -->
+    <div id="view-workspace" class="view view--workspace hidden">
+      <header class="workspace-header">
+        <a href="#" class="logo" id="ws-logo">AI Study Helper</a>
+        <nav class="workspace-header__nav">
+          <a href="#" id="ws-nav-home">Home</a>
+          <a href="#" id="ws-nav-history">History</a>
+          <a href="#" id="ws-nav-about">About</a>
+        </nav>
+        <button type="button" class="btn btn--ghost btn--sm hidden" id="btn-new-session">← New Session</button>
+      </header>
+
+      <!-- 02 – Input -->
+      <div id="screen-input" class="screen screen--input">
+        <h2 class="screen-title">Paste Your Notes</h2>
+        <p class="screen-sub">Choose a study mode, paste your notes below, and click Generate.</p>
 
         <nav class="tabs" role="tablist" aria-label="Study mode">
-          <button type="button" class="tab" role="tab" data-tab="summary" aria-selected="false">
-            <span class="tab__icon" aria-hidden="true">◆</span>
+          <button type="button" class="tab tab--active" role="tab" data-tab="summary" aria-selected="true">
             Summary
           </button>
-          <button type="button" class="tab tab--active" role="tab" data-tab="quiz" aria-selected="true">
-            <span class="tab__icon" aria-hidden="true">◇</span>
-            Quiz
-          </button>
-          <button type="button" class="tab" role="tab" data-tab="flashcards" aria-selected="false">
-            <span class="tab__icon" aria-hidden="true">▭</span>
-            Flashcards
-          </button>
+          <button type="button" class="tab" role="tab" data-tab="quiz" aria-selected="false">Quiz</button>
+          <button type="button" class="tab" role="tab" data-tab="flashcards" aria-selected="false">Flashcards</button>
         </nav>
 
-        <main class="main-panel">
-          <!-- Summary -->
-          <section id="panel-summary" class="panel" hidden>
-            <p class="panel-lead">Turn your notes into clear study summaries.</p>
-            <input type="file" id="fileUploadSummary" accept=".txt" />
-            <textarea id="notes" class="notes-input" placeholder="Paste your notes here..."></textarea>
-            <select id="language">
+        <div class="input-area-wrap">
+          <textarea
+            id="notes-main"
+            class="notes-input notes-input--large"
+            placeholder="Paste your lecture notes here..."
+            rows="10"
+          ></textarea>
+          <div class="input-or">
+            <span>— or —</span>
+            <label class="btn btn--secondary btn--upload">
+              Upload .txt file
+              <input type="file" id="file-upload-main" accept=".txt,text/plain" hidden />
+            </label>
+          </div>
+        </div>
+
+        <div class="input-settings">
+          <label class="input-setting">
+            <span>Output language</span>
+            <select id="language-main">
               <option value="English">English</option>
               <option value="Arabic">Arabic</option>
               <option value="French">French</option>
             </select>
-            <button type="button" class="btn btn--primary btn--block" id="btn-generate-summary">
-              Generate Notes
-            </button>
-            <div id="loading-summary" class="loading hidden">Generating…</div>
-            <div class="output-card" id="output-summary-wrap">
-              <h2 class="output-card__title">Result</h2>
-              <pre id="output-summary" class="output-card__body"></pre>
-            </div>
-          </section>
-
-          <!-- Quiz -->
-          <section id="panel-quiz" class="panel panel--quiz">
-            <div class="quiz-status">
-              <span class="quiz-status__score" id="quiz-score-label">Score: <strong id="quiz-score-num">6</strong> / <span id="quiz-score-total">10</span></span>
-              <span class="quiz-status__q" id="quiz-q-label">Q <span id="quiz-current">3</span> of <span id="quiz-of">10</span></span>
-              <div class="quiz-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="30" id="quiz-progress-wrap">
-                <div class="quiz-progress__fill" id="quiz-progress-fill" style="width: 30%"></div>
-                <span class="quiz-progress__pct" id="quiz-progress-pct">30%</span>
-              </div>
-            </div>
-
-            <div class="quiz-card">
-              <h2 class="quiz-question" id="quiz-question-text"></h2>
-              <div class="quiz-options" id="quiz-options" role="radiogroup" aria-labelledby="quiz-question-text"></div>
-
-              <div class="quiz-explanation" id="quiz-explanation-wrap">
-                <div class="quiz-explanation__head">
-                  <span class="quiz-explanation__bulb" aria-hidden="true">💡</span>
-                  <strong>Explanation:</strong>
-                </div>
-                <p class="quiz-explanation__text" id="quiz-explanation-text"></p>
-              </div>
-            </div>
-
-            <div class="quiz-nav">
-              <button type="button" class="btn btn--ghost" id="quiz-prev">← Previous</button>
-              <button type="button" class="btn btn--primary" id="quiz-next">Next Question →</button>
-            </div>
-          </section>
-
-          <!-- Flashcards -->
-          <section id="panel-flashcards" class="panel" hidden>
-            <p class="panel-lead">Paste notes and generate flashcards (Q&amp;A).</p>
-            <input type="file" id="fileUploadFlashcards" accept=".txt" />
-
-            <textarea id="fc-notes" class="notes-input" placeholder="Paste your notes here..."></textarea>
-
-            <select id="language-fc">
-              <option value="English">English</option>
-              <option value="Arabic">Arabic</option>
-              <option value="French">French</option>
+          </label>
+          <label class="input-setting input-setting--quiz-only hidden" id="wrap-max-q">
+            <span>Max questions</span>
+            <select id="max-questions">
+              <option value="5">5</option>
+              <option value="10" selected>10</option>
+              <option value="15">15</option>
+              <option value="20">20</option>
             </select>
-            <button type="button" class="btn btn--primary btn--block" id="btn-generate-fc">Generate Flashcards</button>
-            <div id="loading-fc" class="loading hidden">Generating…</div>
-            <div class="flashcard" id="flashcard-demo" hidden>
-              <div class="flashcard__inner">
-                <p class="flashcard__q" id="fc-q">Question appears here</p>
-                <p class="flashcard__a hidden" id="fc-a">Answer appears here</p>
-              </div>
-              <button type="button" class="btn btn--secondary" id="fc-flip">Show answer</button>
+          </label>
+        </div>
+
+        <button type="button" class="btn btn--primary btn--block btn--generate" id="btn-generate-main">
+          ✨ Generate Study Materials
+        </button>
+        <p class="input-tip">💡 Tip: Longer, structured notes produce better results.</p>
+
+        <div id="loading-main" class="loading hidden">Generating…</div>
+
+        <!-- Flashcards inline result (small) -->
+        <div id="panel-flash-inline" class="panel-flash-inline hidden">
+          <div class="flashcard" id="flashcard-demo">
+            <div class="flashcard__inner">
+              <p class="flashcard__q" id="fc-q">Question</p>
+              <p class="flashcard__a hidden" id="fc-a">Answer</p>
             </div>
-            <pre id="output-fc" class="output-card__body output-card__body--plain"></pre>
-          </section>
-        </main>
+            <button type="button" class="btn btn--secondary" id="fc-flip">Show answer</button>
+          </div>
+          <pre id="output-fc" class="output-card__body output-card__body--plain"></pre>
+        </div>
       </div>
 
-      <!-- Session History -->
-      <div id="view-history" class="view view--history" hidden>
-        <header class="app-header app-header--history">
-          <a href="#" class="logo" id="btn-back-study">AI Study Helper</a>
-        </header>
+      <!-- 03 – Summary results -->
+      <div id="screen-summary-results" class="screen screen--summary-results hidden">
+        <nav class="tabs tabs--compact" role="tablist">
+          <button type="button" class="tab tab--active" data-results-tab="summary">Summary</button>
+          <button type="button" class="tab" data-results-tab="quiz">Quiz</button>
+          <button type="button" class="tab" data-results-tab="flashcards">Flashcards</button>
+        </nav>
 
-        <div class="history-wrap">
-          <h1 class="history-title">Session History</h1>
-          <p class="history-sub">All your past study sessions — click any card to reload.</p>
-
-          <div class="history-toolbar">
-            <div class="search-wrap">
-              <span class="search-wrap__icon" aria-hidden="true">🔍</span>
-              <input type="search" id="session-search" class="search-input" placeholder="Search sessions..." autocomplete="off" />
+        <div class="summary-split">
+          <div class="summary-col summary-col--notes">
+            <h3 class="summary-col__heading">Your notes</h3>
+            <div class="summary-notes-body" id="summary-notes-display"></div>
+          </div>
+          <div class="summary-col summary-col--ai">
+            <h3 class="summary-col__heading">AI-generated summary</h3>
+            <div class="summary-blocks" id="summary-blocks">
+              <div class="summary-block summary-block--blue">
+                <h4 class="summary-block__title">Key concept</h4>
+                <p class="summary-block__text" id="block-key"></p>
+              </div>
+              <div class="summary-block summary-block--green">
+                <h4 class="summary-block__title">Process &amp; steps</h4>
+                <div class="summary-block__text" id="block-process"></div>
+              </div>
+              <div class="summary-block summary-block--orange">
+                <h4 class="summary-block__title">Important outputs</h4>
+                <div class="summary-block__text" id="block-outputs"></div>
+              </div>
             </div>
-            <div class="filter-wrap">
-              <button type="button" class="btn btn--filter" id="btn-filter" aria-haspopup="true" aria-expanded="false">
-                Filter <span class="caret" aria-hidden="true">▾</span>
-              </button>
-              <ul class="filter-menu hidden" id="filter-menu" role="menu">
-                <li><button type="button" data-filter="all" role="menuitem">All modes</button></li>
-                <li><button type="button" data-filter="Quiz" role="menuitem">Quiz</button></li>
-                <li><button type="button" data-filter="Flashcards" role="menuitem">Flashcards</button></li>
-                <li><button type="button" data-filter="Summary" role="menuitem">Summary</button></li>
-              </ul>
+            <div class="summary-actions">
+              <button type="button" class="btn btn--primary" id="btn-save-session">💾 Save Session</button>
+              <button type="button" class="btn btn--secondary" id="btn-export-pdf">📄 Export PDF</button>
             </div>
           </div>
-
-          <ul class="session-list" id="session-list"></ul>
         </div>
+      </div>
+
+      <!-- 04 – Quiz -->
+      <div id="screen-quiz" class="screen screen--quiz hidden">
+        <nav class="tabs tabs--compact">
+          <button type="button" class="tab" data-quiz-nav="summary">Summary</button>
+          <button type="button" class="tab tab--active" data-quiz-nav="quiz">Quiz</button>
+          <button type="button" class="tab" data-quiz-nav="flashcards">Flashcards</button>
+        </nav>
+
+        <div class="quiz-status">
+          <span class="quiz-status__score">Score: <strong id="quiz-score-num">0</strong> / <span id="quiz-score-total">10</span></span>
+          <span class="quiz-status__q">Q <span id="quiz-current">1</span> of <span id="quiz-of">10</span></span>
+          <div class="quiz-progress" id="quiz-progress-wrap" role="progressbar" aria-valuenow="10">
+            <div class="quiz-progress__fill" id="quiz-progress-fill" style="width: 10%"></div>
+            <span class="quiz-progress__pct" id="quiz-progress-pct">10%</span>
+          </div>
+        </div>
+
+        <div class="quiz-card">
+          <h2 class="quiz-question" id="quiz-question-text"></h2>
+          <div class="quiz-options" id="quiz-options" role="radiogroup"></div>
+          <div class="quiz-explanation hidden" id="quiz-explanation-wrap">
+            <div class="quiz-explanation__head">
+              <span class="quiz-explanation__bulb">💡</span>
+              <strong>Explanation:</strong>
+            </div>
+            <p class="quiz-explanation__text" id="quiz-explanation-text"></p>
+          </div>
+        </div>
+        <div class="quiz-nav">
+          <button type="button" class="btn btn--ghost" id="quiz-prev">← Previous</button>
+          <button type="button" class="btn btn--primary" id="quiz-next">Next Question →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 05 – Session History -->
+    <div id="view-history" class="view view--history hidden">
+      <header class="app-header app-header--history">
+        <a href="#" class="logo" id="hist-back-logo">AI Study Helper</a>
+      </header>
+      <div class="history-wrap">
+        <h1 class="history-title">Session History</h1>
+        <p class="history-sub">All your past study sessions — click any card to reload.</p>
+        <div class="history-toolbar">
+          <div class="search-wrap">
+            <span class="search-wrap__icon">🔍</span>
+            <input type="search" id="session-search" class="search-input" placeholder="Search sessions..." />
+          </div>
+          <div class="filter-wrap">
+            <button type="button" class="btn btn--filter" id="btn-filter">Filter ▾</button>
+            <ul class="filter-menu hidden" id="filter-menu">
+              <li><button type="button" data-filter="all">All modes</button></li>
+              <li><button type="button" data-filter="Quiz">Quiz</button></li>
+              <li><button type="button" data-filter="Flashcards">Flashcards</button></li>
+              <li><button type="button" data-filter="Summary">Summary</button></li>
+            </ul>
+          </div>
+        </div>
+        <ul class="session-list" id="session-list"></ul>
+      </div>
+    </div>
+
+    <!-- About modal -->
+    <div id="modal-about" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="about-title">
+      <div class="modal__backdrop" id="about-backdrop"></div>
+      <div class="modal__card">
+        <h2 id="about-title">About AI Study Helper</h2>
+        <p>
+          This app uses Google Gemini to turn your notes into summaries, quizzes, and flashcards. Built for
+          INFS3203 — Systems Deployment &amp; Implementation.
+        </p>
+        <button type="button" class="btn btn--primary" id="about-close">Close</button>
       </div>
     </div>
 

@@ -2,14 +2,19 @@ const DEFAULT_TTL_MS = 60 * 60 * 1000;
 
 const store = new Map();
 
-function saveQuizAnswerKey(quizId, answerKey, ttlMs = DEFAULT_TTL_MS) {
+/**
+ * @param {Record<string, number>} answerKey
+ * @param {Record<string, string>} [explanations] questionId -> explanation text
+ */
+function saveQuizAnswerKey(quizId, answerKey, explanations = {}, ttlMs = DEFAULT_TTL_MS) {
   store.set(quizId, {
     answerKey,
+    explanations,
     expiresAt: Date.now() + ttlMs,
   });
 }
 
-function getQuizAnswerKey(quizId) {
+function getQuizSession(quizId) {
   const row = store.get(quizId);
   if (!row) {
     return null;
@@ -18,10 +23,17 @@ function getQuizAnswerKey(quizId) {
     store.delete(quizId);
     return null;
   }
-  return row.answerKey;
+  return {
+    answerKey: row.answerKey,
+    explanations: row.explanations || {},
+  };
 }
 
-/** @internal Test helper */
+function getQuizAnswerKey(quizId) {
+  const s = getQuizSession(quizId);
+  return s ? s.answerKey : null;
+}
+
 function clearQuizStore() {
   store.clear();
 }
@@ -29,5 +41,6 @@ function clearQuizStore() {
 module.exports = {
   saveQuizAnswerKey,
   getQuizAnswerKey,
+  getQuizSession,
   clearQuizStore,
 };

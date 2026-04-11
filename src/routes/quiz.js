@@ -1,7 +1,7 @@
 const express = require('express');
 const { randomUUID } = require('crypto');
 const { generateQuiz } = require('../services/generateQuiz');
-const { saveQuizAnswerKey, getQuizAnswerKey } = require('../services/quizAnswerStore');
+const { saveQuizAnswerKey, getQuizAnswerKey, getQuizSession } = require('../services/quizAnswerStore');
 const { scoreQuizAnswers } = require('../services/scoreQuizAnswers');
 
 const router = express.Router();
@@ -28,8 +28,11 @@ router.post('/generate', async (req, res) => {
     const answerKey = Object.fromEntries(
       questions.map((q) => [q.id, q.correctIndex]),
     );
+    const explanations = Object.fromEntries(
+      questions.map((q) => [q.id, q.explanation || '']),
+    );
     const quizId = randomUUID();
-    saveQuizAnswerKey(quizId, answerKey);
+    saveQuizAnswerKey(quizId, answerKey, explanations);
 
     const clientQuestions = questions.map(({ id, question, options }) => ({
       id,
@@ -75,6 +78,39 @@ router.post('/score', (req, res) => {
   return res.status(200).json({
     quizId: quizId.trim(),
     ...result,
+  });
+});
+
+router.post('/check', (req, res) => {
+  const { quizId, questionId, selectedIndex } = req.body || {};
+
+  if (typeof quizId !== 'string' || !quizId.trim()) {
+    return res.status(400).json({ error: 'quizId is required' });
+  }
+  if (typeof questionId !== 'string' || !questionId.trim()) {
+    return res.status(400).json({ error: 'questionId is required' });
+  }
+  if (!Number.isInteger(selectedIndex) || selectedIndex < 0 || selectedIndex > 3) {
+    return res.status(400).json({ error: 'selectedIndex must be 0–3' });
+  }
+
+  const session = getQuizSession(quizId.trim());
+  if (!session) {
+    return res.status(404).json({ error: 'Quiz not found or expired' });
+  }
+
+  const correctIndex = session.answerKey[questionId];
+  if (correctIndex === undefined) {
+    return res.status(400).json({ error: 'Unknown question' });
+  }
+
+  const correct = correctIndex === selectedIndex;
+  const explanation = session.explanations[questionId] || '';
+
+  return res.status(200).json({
+    correct,
+    explanation,
+    correctIndex,
   });
 });
 

@@ -1,33 +1,27 @@
-const express = require("express");
+const express = require('express');
+const { validateUploadBody } = require('../services/parseTextFile');
 
 const router = express.Router();
 
-/*
-POST /api/upload
-Accepts text content from uploaded .txt file
-Returns parsed text back to frontend
-*/
-
-router.post("/", (req, res) => {
+router.post('/', (req, res) => {
   try {
-    const { text } = req.body;
+    const result = validateUploadBody(req.body);
 
-    if (!text) {
+    if (!result.ok) {
       return res.status(400).json({
-        error: "No text content provided"
+        error: result.error,
       });
     }
 
     return res.json({
-      message: "File parsed successfully",
-      parsedText: text
+      message: 'File parsed successfully',
+      parsedText: result.text,
     });
-
   } catch (error) {
     console.error(error);
 
     return res.status(500).json({
-      error: "File parsing failed"
+      error: 'File parsing failed',
     });
   }
 });
