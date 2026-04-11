@@ -5,7 +5,8 @@ const quizRoutes = require("./routes/quiz");
 const uploadRoutes = require("./routes/upload");
 
 const generateNotes = require("./geminiService");
-const { saveSession } = require("./services/sessionStore");
+const { saveSession, listSessions } = require("./services/sessionStore");
+const { buildFlashcardPrompt } = require("./services/flashcards");
 
 
 function createApp() {
@@ -46,7 +47,7 @@ function createApp() {
       }
 
       else if (mode === "flashcards") {
-        prompt = `Convert into flashcards (Q&A format) in ${language}:\n\n${notes}`;
+        prompt = buildFlashcardPrompt(notes, language);
       }
 
       else {
@@ -62,7 +63,8 @@ function createApp() {
       saveSession({
         notes,
         result: output,
-        date: new Date()
+        mode,
+        date: new Date(),
       });
 
 
@@ -82,6 +84,34 @@ function createApp() {
 
   });
 
+  app.get("/api/history", (req, res) => {
+    try {
+      const sessions = listSessions();
+      res.json({ sessions });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/save", (req, res) => {
+    try {
+      const { notes, result, mode = "summary", title, score } = req.body || {};
+      if (typeof notes !== "string" || typeof result !== "string") {
+        return res.status(400).json({ error: "notes and result are required strings" });
+      }
+      saveSession({
+        notes,
+        result,
+        mode,
+        title: title || null,
+        score: score ?? null,
+        date: new Date(),
+      });
+      res.json({ ok: true });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
 
   // routes
   app.use("/api/quiz", quizRoutes);
