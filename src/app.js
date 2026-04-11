@@ -4,7 +4,7 @@ const path = require("path");
 const quizRoutes = require("./routes/quiz");
 const uploadRoutes = require("./routes/upload");
 
-const generateNotes = require("./geminiService.js");
+const generateNotes = require("./geminiService");
 const { saveSession } = require("./services/sessionStore");
 
 
@@ -17,15 +17,13 @@ function createApp() {
   app.use(express.static(path.join(__dirname, "../public")));
 
 
-  // Health check endpoint (used by Docker / CI smoke test)
-
+  // health check
   app.get("/health", (req, res) => {
     res.status(200).json({ status: "ok" });
   });
 
 
-  // Info endpoint
-
+  // info endpoint
   app.get("/api/info", (req, res) => {
     res.json({
       name: "ai-study-helper",
@@ -34,35 +32,27 @@ function createApp() {
   });
 
 
-  // Summary + Flashcards generator endpoint
-
+  // summary + flashcards generation
   app.post("/api/generate", async (req, res) => {
 
     try {
 
-      const { notes, mode = "summary" } = req.body;
+      const { notes, mode = "summary", language = "English" } = req.body;
 
       let prompt;
 
-
       if (mode === "summary") {
-
-        prompt = `Summarize into short bullet points:\n\n${notes}`;
-
+        prompt = `Summarize into short bullet points in ${language}:\n\n${notes}`;
       }
 
       else if (mode === "flashcards") {
-
-        prompt = `Convert into flashcards (Q&A format):\n\n${notes}`;
-
+        prompt = `Convert into flashcards (Q&A format) in ${language}:\n\n${notes}`;
       }
 
       else {
-
         return res.status(400).json({
           error: "Invalid mode"
         });
-
       }
 
 
@@ -93,19 +83,13 @@ function createApp() {
   });
 
 
-  // Quiz route
-
+  // routes
   app.use("/api/quiz", quizRoutes);
-
-
-  // Upload route (YOUR FEATURE)
-
   app.use("/api/upload", uploadRoutes);
 
 
   return app;
 
 }
-
 
 module.exports = { createApp };
